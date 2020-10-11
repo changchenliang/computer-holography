@@ -1,0 +1,68 @@
+function [img]=angular_spectrum_3D(obj,du,dx,r,z,phi_tx,phi_ty);
+[nx,ny,nz]=size(obj);
+R=du/dx;
+if R>1 || R==1
+    b=1 
+    a=b/R
+end
+if R<1
+    a=1
+    b=a*R
+end
+dfx=a/dx/nx;
+dfy=dfx;dfz=dfx;
+ulim=floor(1/r/dfx/sqrt(1+(2*dfx*z)^2))
+
+tmp=fft_3D(obj,du,dfx);
+[u,v,w]=meshgrid(dfx*((0:ny)-ny/2-0.5),dfy*((1:nx)-nx/2-0.5),dfz*((1:nz)-nz/2-0.5));
+
+[u0_hemi_sph,v0_hemi_sph]=meshgrid(dfx*((1:ny)-ny/2-0.5),dfy*((1:nx)-nx/2-0.5));
+w0_hemi_sph=sqrt((1/(r^2))-u0_hemi_sph.^2-v0_hemi_sph.^2);
+
+%Tz=[cos(phi_t),sin(phi_t),0;-sin(phi_t),cos(phi_t),0;0,0,1];
+Tx=[1,0,0;0,cos(phi_tx),sin(phi_tx);0,-sin(phi_tx),cos(phi_tx)];
+Ty=[cos(phi_ty),0,-sin(phi_ty);0,1,0;sin(phi_ty),0,cos(phi_ty)];      %×ø±êÐý×ª¾ØÕó
+u_hemi_sph=zeros(nx,ny); v_hemi_sph=zeros(nx,ny); w_hemi_sph=zeros(nx,ny);
+for ii=1:nx
+    for jj=1:ny
+        temp=Tx*Ty*[u0_hemi_sph(ii,jj);v0_hemi_sph(ii,jj);w0_hemi_sph(ii,jj)];
+        u_hemi_sph(ii,jj)=temp(1,1);
+        v_hemi_sph(ii,jj)=temp(2,1);
+        w_hemi_sph(ii,jj)=temp(3,1);
+    end
+end    
+
+u_hemi_sph2=mod(u_hemi_sph,1/du); v_hemi_sph2=mod(v_hemi_sph,1/du); w_hemi_sph2=mod(w_hemi_sph,1/du);
+for ii=1:nx
+    for jj=1:ny
+        if w_hemi_sph2(ii,jj)>1/du/2;
+            w_hemi_sph2(ii,jj)=w_hemi_sph2(ii,jj)-1/du;
+        end
+        if u_hemi_sph2(ii,jj)>1/du/2;
+            u_hemi_sph2(ii,jj)=u_hemi_sph2(ii,jj)-1/du;
+        end
+        if v_hemi_sph2(ii,jj)>1/du/2;
+            v_hemi_sph2(ii,jj)=v_hemi_sph2(ii,jj)-1/du;
+        end
+    end
+end
+
+tmp2=interp3(u,v,w,tmp,u_hemi_sph2,v_hemi_sph2,w_hemi_sph2,'linear');
+
+chrp=(1./w0_hemi_sph).*exp(1i*2*pi*z.*w0_hemi_sph);
+chrptmp=zeros(size(chrp));
+if ulim*2<nx
+    xlim=nx/2-ulim+1
+    ylim=nx/2+ulim
+    chrptmp(xlim:ylim,xlim:ylim)=chrp(xlim:ylim,xlim:ylim);
+else
+    chrptmp=chrp;
+end
+img=inv_fft_2D(tmp2.*chrp,dfx,dx);
+
+save img.mat;
+
+
+
+
+

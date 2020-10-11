@@ -1,0 +1,15 @@
+function output=inv_fft_2D(input,dfx,dx)
+[xx,yy,]=size(input);
+s=dx*dfx;
+A=zeros(xx,yy);
+for ii=1:xx
+    for jj=1:yy
+            A(ii,jj)=s*((ii-1-ceil(xx/2))^2+(jj-1-ceil(yy/2))^2);
+    end
+end
+chirp1=exp(1i*pi*A);
+chirp_conv=exp(-1i*pi*A);
+input=input.*chirp1;
+output=(fft(ifft(fftshift(input).*ifft(fftshift(chirp_conv)))));
+chirp2=chirp1;
+output=output.*chirp2;
