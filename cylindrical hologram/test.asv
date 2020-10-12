@@ -1,0 +1,14 @@
+%test
+
+imgA=double(rgb2gray(imread('pic\A256.jpg')));
+imgB=double(rgb2gray(imread('pic\B256.jpg')));
+imgC=double(rgb2gray(imread('pic\C256.jpg')));
+imgD=double(rgb2gray(imread('pic\D256.jpg')));
+
+[mm,nn]=size(imgA);
+img=zeros(mm,nn,nn);
+img(:,:,1)=imgA;
+img(:,nn,:)=imgB;
+img(:,:,nn)=imgC;
+img(:,1,:)=imgD;
+[x,y,z]=meshgrid(1:mm,1:nn,1:nn);
