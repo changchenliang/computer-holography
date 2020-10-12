@@ -1,0 +1,14 @@
+%test
+
+clear;clc;
+img0=double(rgb2gray(imread('pic\lena512.jpg'))); 
+[mm,nn]=size(img0);
+z=0.1;
+dx=8e-6;
+lamda=5.32e-7;
+x=linspace(-dx*nn/2,dx*nn/2,nn);
+y=linspace(-dx*mm/2,dx*mm/2,mm);
+[x,y]=meshgrid(x,y);
+
+b=1-img0/max(max(abs(im)));
+
