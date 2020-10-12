@@ -1,0 +1,36 @@
+function [ du,dv, img ] = angular_spectrum_mn( dx,dy, r, obj, z );
+%ANGULAR_SPECTRUM Summary of this function goes here
+%   Detailed explanation goes here
+
+%!!!!!!!!
+%注意：r=r0/n，及波长是光在介质中的波长，而非真空中的波长。
+% disp('角谱传播函数，正向传播z为正，反向传播z为负');
+% disp(strcat('z = ',num2str(z)));
+% disp('注意：r=r0/n，及波长是光在介质中的波长，而非真空中的波长。');
+% disp('');
+
+du = dx;
+dv = dy;
+[mm,nn] = size(abs(obj));
+
+dfx = 1/(dx*nn);
+dfy = 1/(dy*mm);
+
+
+
+% % Q operator with dfx, dfy at frequency plane
+pha = zeros(mm,nn);
+for ii = 1:mm
+    for jj = 1:nn
+        pha(ii,jj) = dfx^2*(ii-nn/2-0.5)^2 + dfy^2*(jj-mm/2-0.5)^2; % fx^2 + fy^2
+    end
+end
+
+% pha = e_pha_dfx;
+e_pha = exp(1i*2*pi*z/r.*sqrt(1-r^2.*pha));
+
+tmp = fftshift(fft2(fftshift(obj)));
+tmp = tmp.*e_pha;
+img = fftshift(ifft2(fftshift(tmp)));
+
+return

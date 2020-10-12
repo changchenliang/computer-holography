@@ -1,0 +1,47 @@
+function [chrp2,dx,obj]=inv_frft_2(img,a,dfx,r,fe,chrp)
+% The fast Fractional Fourier Transform
+% input: f = samples of the signal
+%        a = fractional power
+% output: Faf = fast Fractional Fourier transform
+
+f=img;
+[m,n] = size(f);
+
+% do special cases
+if (a==0), obj = f; return; end;
+if (a==2), obj = flipud(f); return; end;
+if (a==1), obj = fft2(f); return; end 
+% reduce to interval 0.5 < a < 1.5
+
+% the general case for 0.5 < a < 1.5
+alpha = a*pi/2;
+tana2 = tan(alpha);
+sina = sin(alpha);
+[m,n]=size(img);
+dfy=dfx;
+dx = 1/(dfx*n)*r*fe*sina;
+dy = 1/(dfy*m)*r*fe*sina;
+
+chrp1=zeros(m,n);
+for ii=1:m
+    for jj=1:n
+        chrp1(ii,jj)=exp(-i*pi/r/fe/tana2*(dfx^2*(ii-1-ceil(m/2))^2+dfy^2*(jj-1-ceil(n/2))^2));
+    end
+end
+img=img.*chrp1;
+%multiplication by chirp!
+
+obj=fftshift(ifft2(fftshift(img)));
+% convolution with chirp
+
+chrp2=zeros(m,n);
+for ii=1:m
+    for jj=1:n
+        chrp2(ii,jj)=exp(-i*pi/r/fe/tana2*(dx^2*(ii-1-ceil(m/2))^2+dy^2*(jj-1-ceil(n/2))^2));
+    end
+end
+obj=obj.*chrp2;
+
+obj = fftshift(fft2(fftshift(obj)));
+obj=obj.*chrp;
+%multiplication by chirp!

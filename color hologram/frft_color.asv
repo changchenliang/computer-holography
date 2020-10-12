@@ -1,0 +1,35 @@
+img0=double((imread('pic\lena512.jpg')));
+  
+r=6.33e-7;
+dx=1.5e-5;
+%dxG=1.390758975e-5;
+%dxR=1.319737156e-5;
+
+%[obj_phi_B] = GS_frft_color(img0_B,obj_phi,a,dx);
+%[obj_phi_G] = GS_frft_color(img0_G,obj_phi,a,dx);
+[obj_phi_R] = GS_frft_color(img0_R,obj_phi,a,dx);
+
+%obj_B=exp(1i.*obj_phi_B);
+%obj_G=exp(1i.*obj_phi_G);
+obj_R=exp(1i.*obj_phi_R);
+rB=4.90e-7;
+rG=5.70e-7;
+rR=6.33e-7;
+dx=1.5e-5;
+a=1.25;
+f1=0.5;
+fe=f1*sin(a*pi/2);
+%[dfx_B,img_B]=frft_2(obj_B,a,dx,rB,fe);
+%[dfx_G,img_G]=frft_2(obj_G,a,dx,rG,fe);
+[dfx_R,img_R]=frft_2(obj_R,a,dx,rB,fe);
+
+%img_B=abs(img_B)/max(max(abs(img_B)));
+%img_G=abs(img_G)/max(max(abs(img_G)));
+img_R=abs(img_R)/max(max(abs(img_R)));
+%figure; imshow(img_B);
+%figure; imshow(img_G);
+%figure; imshow(img_R);
+%img_rec(:,:,1)=img_R;
+%img_rec(:,:,2)=img_G;
+%img_rec(:,:,3)=img_B;
+figure; imshow(img_R);

@@ -1,0 +1,43 @@
+function [obj_phi] = GS_frft_multiplane(r,dx);
+imgA=double(rgb2gray(imread('pic\A512.jpg')));
+imgB=double(rgb2gray(imread('pic\B512.jpg')));
+imgC=double(rgb2gray(imread('pic\C512.jpg')));
+imgA=abs(imgA)/max(max(imgA));
+imgB=abs(imgB)/max(max(imgB));
+imgC=abs(imgC)/max(max(imgC));
+
+[mm,nn] = size(imgA);                %取分辨率
+
+aA=1.25;
+aB=1.2710;
+aC=1.3027;
+f1=0.5;
+obj_phi=rand(size(imgA));
+feA=f1*sin(aA*pi/2);
+feB=f1*sin(aB*pi/2);
+feC=f1*sin(aC*pi/2);
+
+b=1;
+p=0;
+t=[];
+k=[];
+for ii = 0:16                                         %迭代次数
+    obj=b.*exp(1i.*obj_phi);                 
+    [dfxA,img_A]=frft_2(obj,aA,dx,r,feA);
+    img_phi_A=angle(img_A);      
+    img_A = imgA.*exp(1i.*img_phi_A);
+    
+   
+    [dx,obj_mid] = inv_frft_2(img_A,aG,dfxG,r,feG);
+    %[dx obj_G ] = inv_fresnel_cov( dfxG, r, img_G, 0.5 );
+    %[dx,obj_B] = inv_frft_2(img_B,aB,dfxB,r,feB);
+    %obj_RGB=obj_R+obj_G+obj_B; 
+    obj_phi=angle(obj_G);
+    %b=avesqrt(abs(obj));
+    k(ii+1)=ii;
+    ii
+
+end
+
+return;
+
