@@ -1,0 +1,56 @@
+clc; clear;
+
+img0=double(rgb2gray(imread('pic\EI7200.jpg')));
+D=60e-3;%Ö±¾¶
+F=180e-3;%½¹¾à  f-num=4
+lens_d=1e-3;%Î¢Í¸¾µÖ±¾¶
+lens_f=lens_d*F/D;%Î¢Í¸¾µ½¹¾à
+micr_N=ceil(D/lens_d);%Î¢Í¸¾µ¸öÊý
+m=ceil(M/micr_N);n=ceil(N/micr_N);%£¨m,n£©ÎªÃ¿ÕÅÐ¡»ù±¾Í¼ÏñµÄÏñËØ
+z0=0.3;
+z=0.35
+r=0.001;
+dx=0.001;
+dy=0.001;
+theta0=5*pi/180;
+fi0=5*pi/180;
+theta=linspace(-theta0,theta0,m);
+fi=linspace(-fi0,fi0,n);
+[mm,nn]=size(img0);
+obj=zeros(mm,nn);
+
+for ii=ceil(m/3)+1:ceil(m*2/3)
+    for jj=ceil(n/3)+1:ceil(n*2/3)
+        oi=EI2oi(img0,micr_N,micr_N,m,n,ii,jj);
+        xshift=floor((z)*fi(jj)/dx);
+        yshift=floor((z0+z)*theta(ii)/dy);
+        se=translate(strel(1),[-yshift xshift]);
+        shiftimg=imdilate(img0,se);
+        for kk=1:mm
+            for ll=1:nn
+                if shiftimg(kk,ll)==-Inf;
+                    shiftimg(kk,ll)=0;
+                end
+            end
+        end
+        %figure; imshow(uint8(shiftimg));
+        phi=2*pi*z/r*(theta(ii)^2+fi(jj)^2);
+        obj_tmp=shiftimg*exp(1i*phi);
+        obj=obj+obj_tmp;
+    end
+end
+
+%[ du, obj ] = angular_spectrum( dx, r, img0, -z );
+figure; imshow(mat2gray(abs(obj)));
+obj_phi=mod(angle(obj),2*pi);
+obj_phi=(obj_phi)/2/pi;
+figure; imshow(obj_phi);
+
+a=1;
+[dfx img ] = fresnel_cov(a*dx, a*a*r, obj, -z );
+%for z=0.005:0.001:0.015
+%[ du, img ] = angular_spectrum( dx, r, obj, -z0 );
+figure; imshow(mat2gray(abs(fftshift(img))));
+%end
+
+
